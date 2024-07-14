@@ -108,7 +108,7 @@ class Rasterizer(object):
 
         return dy1, dy2, curx1, curx2, invslope1, invslope2
 
-    def _fill_top_flat_triangle(self, face: List, value: float):
+    def _fill_top_flat_triangle(self, face: List, z_value: float):
         _ = self._preprocessor(face, is_bottom_flat=False)
         # Skip too small / unprocessable triangle.
         if _ is None:
@@ -118,13 +118,11 @@ class Rasterizer(object):
 
         # Fill rows except of last line.
         for y in range(dy1, dy2, -1):
-            # mask_z = value >= self._screen[y, curdx1:curdx2 + 1]
-            # self._screen[y, curdx1:curdx2 + 1] = value
 
             prev_values = self._screen[y, curdx1:curdx2 + 1]
-            z_mask = prev_values > value
+            z_mask = prev_values > z_value
             next_values = prev_values
-            next_values[z_mask] = value
+            next_values[z_mask] = z_value
             self._screen[y, curdx1:curdx2 + 1] = next_values
 
             curx1 += invslope1
@@ -132,14 +130,13 @@ class Rasterizer(object):
             curdx1, curdx2 = self._x_coo(curx1), self._x_coo(curx2)
 
         # Process last line.
-        # mask_z = value >= self._screen[dy2, curdx1:curdx2 + 1]
         prev_values = self._screen[dy2, curdx1:curdx2 + 1]
-        z_mask = prev_values > value
+        z_mask = prev_values > z_value
         next_values = prev_values
-        next_values[z_mask] = value
+        next_values[z_mask] = z_value
         self._screen[dy2, curdx1:curdx2 + 1] = next_values
 
-    def _fill_bottom_flat_triangle(self, face: List, value: float):
+    def _fill_bottom_flat_triangle(self, face: List, z_value: float):
         _ = self._preprocessor(face, is_bottom_flat=True)
         # Skip too small / unprocessable triangle.
         if _ is None:
@@ -149,14 +146,10 @@ class Rasterizer(object):
         # Fill rows except of last line.
         for y in range(dy1, dy2, 1):
 
-            # mask_z = np.where(value >= self._screen[y, curdx1:curdx2 + 1])
-            # print(mask_z)
-            # self._screen[y, curdx1:curdx2 + 1] = value
-
             prev_values = self._screen[y, curdx1:curdx2 + 1]
-            z_mask = prev_values > value
+            z_mask = prev_values > z_value
             next_values = prev_values
-            next_values[z_mask] = value
+            next_values[z_mask] = z_value
             self._screen[y, curdx1:curdx2 + 1] = next_values
 
             # Move in y-direction - more to bottom.
@@ -167,15 +160,13 @@ class Rasterizer(object):
             curdx1, curdx2 = self._x_coo(curx1), self._x_coo(curx2)
 
         # Process last line.
-        # mask_z = value >= self._screen[dy2, curdx1:curdx2 + 1]
-        # self._screen[dy2, curdx1:curdx2 + 1] = value
         prev_values = self._screen[dy2, curdx1:curdx2 + 1]
-        z_mask = prev_values > value
+        z_mask = prev_values > z_value
         next_values = prev_values
-        next_values[z_mask] = value
+        next_values[z_mask] = z_value
         self._screen[dy2, curdx1:curdx2 + 1] = next_values
 
-    def rasterize_triangle(self, face: Union[List, np.ndarray], value: float = 255) -> None:
+    def rasterize_triangle(self, face: Union[List, np.ndarray], z_value: float = 255) -> None:
         if isinstance(face, np.ndarray):
             face = face.tolist()
 
@@ -184,9 +175,9 @@ class Rasterizer(object):
 
         # Case when triangle si flat from top
         if abs(face[0][1] - face[1][1]) < IS_ZERO_TOL:
-            self._fill_top_flat_triangle(face=face, value=value)
+            self._fill_top_flat_triangle(face=face, z_value=z_value)
         elif abs(face[1][1] - face[2][1]) < IS_ZERO_TOL:
-            self._fill_bottom_flat_triangle(face=face, value=value)
+            self._fill_bottom_flat_triangle(face=face, z_value=z_value)
 
         # Case when vertex 4 has to be esetimated.
         else:
@@ -206,8 +197,8 @@ class Rasterizer(object):
             # Split triangle to 2 separated (top flat and bottom flat)
             face_top_flat, face_bottom_flat = [face[1], face[2], [x, face[1][1]]], [face[0], face[1], [x, face[1][1]]]
 
-            self._fill_bottom_flat_triangle(face=face_bottom_flat, value=value)
-            self._fill_top_flat_triangle(face=face_top_flat, value=value)
+            self._fill_bottom_flat_triangle(face=face_bottom_flat, z_value=z_value)
+            self._fill_top_flat_triangle(face=face_top_flat, z_value=z_value)
 
     def rasterize_trinagles(self, faces: List[List]) -> None:
         pass
