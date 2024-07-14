@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "occlusion-modeling"
+version = "0.1.0"
+description = ""
+authors = ["Marat Kopytjuk <kopytjuk@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.26.4"
+pandas = "^2.2.2"
+matplotlib = "^3.9.1"
+ipykernel = "^6.29.5"
+ipython = "^8.26.0"
+shapely = "^2.0.5"
+open3d = "^0.18.0"
+scikit-learn = "^1.5.1"
+pyyaml = "^6.0.1"
+addict = "^2.4.0"
+tqdm = "^4.66.4"
+scipy = "^1.14.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
